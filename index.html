@@ -239,6 +239,135 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/06/03/20180603/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="uitu">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/dead.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="uitu_blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/03/20180603/" itemprop="url">字符串常量池</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-03T22:29:19+08:00">
+                2018-06-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="java基础-字符串常量池"><a href="#java基础-字符串常量池" class="headerlink" title="java基础-字符串常量池"></a>java基础-字符串常量池</h1><h3 id="环境说明："><a href="#环境说明：" class="headerlink" title="环境说明："></a>环境说明：</h3><p>操作系统：windos7<br>JDK：1.6、1.7、1.8</p>
+<h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>&emsp;&emsp;java虚拟机在加载时，对于能够确定下来的常量值会将其添加到常量池中，例如字面量声明方式 ，以便复用。常量池包含静态常量池和运行时常量池，静态常量池和运行时常量池两者的关系和区分还没研究明白，后续再补充。</p>
+<h3 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h3><h4 id="字符串常量池："><a href="#字符串常量池：" class="headerlink" title="字符串常量池："></a>字符串常量池：</h4><h5 id="放置位置："><a href="#放置位置：" class="headerlink" title="放置位置："></a>放置位置：</h5><p>&emsp;&emsp;在JDK1.6版本，字符串常量池是放在Perm Gen区，也就是方法区中。<br>&emsp;&emsp;在JDK1.7版本中，字符串常量池被移到了堆中，原因一个是方法区空间不足，一个是后续布局，JDK1.8去除了方法区，改成了元空间。</p>
+<h5 id="常量池："><a href="#常量池：" class="headerlink" title="常量池："></a>常量池：</h5><p>&emsp;&emsp;在JDK1.7之前的版本，加载时会先检查常量池中是否存在该值，有则直接返回该值的地址，没有则在常量池中新增，然后返回地址。<br>&emsp;&emsp;在JDK1.7之后的版本，加载时会先检查常量池中是否存在该值或该值的引用，有则直接返回地址或引用，没有则在常量池中新增，然后返回地址。<br>&emsp;&emsp;String提供的intern方法，在JDK1.7之前的版本是先检查常量池中是否存在该值，有则返回该值的地址，没有则将原生字符串拷贝到常量池中，然后返回常量池中的地址。<br>&emsp;&emsp;在JDK1.7之后的版本先检查常量池中是否存在该值或该值的引用，有则返回该值的地址或引用，没有则将该值在堆的地址放入常量池中，并返回堆的地址。<br>&emsp;&emsp;使用new声明时，也会查询常量池中是否有对应的值（使用equals方法），没有则在常量池中创建，然后在堆中创建对象，并返回地址。</p>
+<p>例子1：<br>String a = “aa” ; //值在常量池，引用在栈<br>String b = “b” + “b” ; //值在常量池，引用在栈<br>String c = a + “a” ; //a 未确定，不会放入常量池中，但是如果a使用final声明时，则可以确定值，并放入常量池， 是在执行的时候在堆中分配空间<br>String d = “a” + new String(“a”); //不寻找常量池，在执行时直接在堆中分配空间<br>String e = d.intern(); //字符串可以通过intern()方法声明放入常量池<br>a == b ; //true<br>a == c ; //false<br>a == d; //false<br>c == d ; //false<br>a == e ; //true</p>
+<p>例子2：<br>String c = new String(“a”); //检查常量池中是否有”a”，没有则在常量池中新增，然后在堆中生成”a”对象， 返回堆中的地址<br>String a = c + c;//拼接符号拼接成”aa”，实际是调用StringBuffer的append方法拼接，使用toString输出，所以是在堆中生成”aa”，并且没有在常量池中生成”aa”【此处无法确认是否会生成char[]类型的常量】，返回堆地址<br>String ai = a.intern(); //将”aa”的值放入常量池， 常量池中并没有”aa”，所以将”aa”在堆中的地址放入常量池中，返回”aa”在堆中的地址<br>String b = “aa”; //将”aa”的值放入常量池中，但是常量池已有”aa”在堆中的地址，所以返回”aa”在堆中的地址</p>
+<p>String ci = c.intern();//将”a”的值放入常量池中，但是常量池已有”a”，所以返回常量池”a”的地址<br>String d = “a” ;//将”a”的值放入常量池中，但是常量池已有”a”，所以返回常量池”a”的地址</p>
+<p>System.out.println(a == b);//true<br>System.out.println(ai == b);//true</p>
+<p>System.out.println(c == d);//false<br>System.out.println(ci == d);//true</p>
+<h4 id="其他常量池："><a href="#其他常量池：" class="headerlink" title="其他常量池："></a>其他常量池：</h4><p>&emsp;&emsp;常量的封装类都实现了常量池技术， 但是Integer常量池的范围是-128~127，超出此返回不再使用，其他常量的封装类都有范围限制。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/24/20180524/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -311,8 +440,8 @@
         
           
             <h1 id="Python基础（一）环境搭建"><a href="#Python基础（一）环境搭建" class="headerlink" title="Python基础（一）环境搭建"></a>Python基础（一）环境搭建</h1><h3 id="环境说明："><a href="#环境说明：" class="headerlink" title="环境说明："></a>环境说明：</h3><p>操作系统：windows7<br>python版本：3.6</p>
-<h3 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h3><h4 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h4><p>&emsp;&emsp;首选是安装包，访问<a href="https://www.python.org/" target="_blank" rel="noopener">python官网</a>，选择好自己想要的版本以及符合自己电脑的版本下载即可。<br><img src="/images/1.png" alt="python官网截图"><br>1.我选择的是：Windows x86-64 executable installer（windows64位系统使用安装程序），选择定制安装<br><img src="/images/3.png" alt="第一步安装截图"><br>2.第二步，全部勾选，目前只了解一个pip是用于管理python工具类库的工具，其他暂时还未用到<br><img src="/images/4.png" alt="第二步安装截图"><br>3.第三步，勾选的是一个关联所有.py的文件，一个是创建快捷方式，一个是创建环境变量，未勾选的一个是为所有用户安装，一个是安装预编译标准库（保存代码时会提前编译，执行的时候稍微快些），最后两个是debug相关的，不怎么了解。<br><img src="/images/5.png" alt="第三步安装截图"></p>
-<h4 id="环境变量"><a href="#环境变量" class="headerlink" title="环境变量"></a>环境变量</h4><p>&emsp;&emsp;环境变量主要是一个path路径，将python的安装路径和安装路径下的Scripts文件夹路径都加进去，路径之间用半角字符分号隔开，作用是系统调用python库时，系统会按path路径一个个寻找，找到执行库时才能执行。如果使用exe安装程序勾选了Add python to PATH 就不需要配置环境变量，自动添加在当前用户的全局变量中。<br>例如我的环境变量是：</p>
+<h3 id="正文："><a href="#正文：" class="headerlink" title="正文："></a>正文：</h3><h4 id="安装："><a href="#安装：" class="headerlink" title="安装："></a>安装：</h4><p>&emsp;&emsp;首选是安装包，访问<a href="https://www.python.org/" target="_blank" rel="noopener">python官网</a>，选择好自己想要的版本以及符合自己电脑的版本下载即可。<br><img src="/images/1.png" alt="python官网截图"><br>1.我选择的是：Windows x86-64 executable installer（windows64位系统使用安装程序），选择定制安装<br><img src="/images/3.png" alt="第一步安装截图"><br>2.第二步，全部勾选，目前只了解一个pip是用于管理python工具类库的工具，其他暂时还未用到<br><img src="/images/4.png" alt="第二步安装截图"><br>3.第三步，勾选的是一个关联所有.py的文件，一个是创建快捷方式，一个是创建环境变量，未勾选的一个是为所有用户安装，一个是安装预编译标准库（保存代码时会提前编译，执行的时候稍微快些），最后两个是debug相关的，不怎么了解。<br><img src="/images/5.png" alt="第三步安装截图"></p>
+<h4 id="环境变量："><a href="#环境变量：" class="headerlink" title="环境变量："></a>环境变量：</h4><p>&emsp;&emsp;环境变量主要是一个path路径，将python的安装路径和安装路径下的Scripts文件夹路径都加进去，路径之间用半角字符分号隔开，作用是系统调用python库时，系统会按path路径一个个寻找，找到执行库时才能执行。如果使用exe安装程序勾选了Add python to PATH 就不需要配置环境变量，自动添加在当前用户的全局变量中。<br>例如我的环境变量是：</p>
 <pre><code>C:\Users\Administrator\AppData\Local\Programs\Python\Python36\Scripts\;
 C:\Users\Administrator\AppData\Local\Programs\Python\Python36\;
 </code></pre><p><img src="/images/2.png" alt="path环境变量"></p>
@@ -402,7 +531,7 @@ C:\Users\Administrator\AppData\Local\Programs\Python\Python36\;
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
